@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="GridSense Smart Electricity Monitoring Dashboard" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <title>GridSense Monitor</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header id="main-header">
+        <div class="header-left">
+          <div class="logo-icon" aria-hidden="true">
+            <span class="logo-bolt">GRID</span>
+          </div>
+          <div>
+            <h1>GridSense Monitor</h1>
+            <p class="header-subtitle">Smart Electricity Theft Detection System</p>
+          </div>
+        </div>
+        <div class="header-right">
+          <div class="live-indicator">
+            <span class="live-dot"></span>
+            LIVE
+          </div>
+          <div id="header-clock" class="header-clock">--:--:--</div>
+        </div>
+      </header>
+
+      <div id="alert-banner" class="alert-banner alert-safe">
+        <div id="alert-icon" class="alert-icon">OK</div>
+        <div class="alert-text">
+          <strong id="alert-title">SYSTEM NORMAL</strong>
+          <span id="alert-message">Loading current system state.</span>
+        </div>
+        <div class="alert-pulse"></div>
+      </div>
+
+      <main id="dashboard-main">
+        <section id="status-panel" class="section hidden">
+          <h2 class="section-title">Connection Status</h2>
+          <p id="status-message" class="empty-state"></p>
+        </section>
+
+        <section id="overview-section" class="section">
+          <h2 class="section-title">System Overview</h2>
+          <div class="overview-cards">
+            <article class="card card-power">
+              <div class="card-icon">IN</div>
+              <div class="card-content">
+                <span class="card-label">Total Input Power</span>
+                <span class="card-value"><span id="overview-input">--</span> <small>kW</small></span>
+              </div>
+              <div class="card-trend trend-stable">Grid Feed</div>
+            </article>
+            <article class="card card-consumption">
+              <div class="card-icon">OUT</div>
+              <div class="card-content">
+                <span class="card-label">Total Billed Consumption</span>
+                <span class="card-value"><span id="overview-consumption">--</span> <small>kW</small></span>
+              </div>
+              <div class="card-trend trend-up">Metered</div>
+            </article>
+            <article class="card card-loss">
+              <div class="card-icon">LINE</div>
+              <div class="card-content">
+                <span class="card-label">Travel Loss</span>
+                <span class="card-value"><span id="overview-travel-loss">--</span> <small>kW</small></span>
+              </div>
+              <div id="overview-travel-loss-percent" class="card-trend trend-stable">--</div>
+            </article>
+            <article class="card card-theft">
+              <div class="card-icon">THEFT</div>
+              <div class="card-content">
+                <span class="card-label">Estimated Theft</span>
+                <span class="card-value"><span id="overview-theft">--</span> <small>kW</small></span>
+              </div>
+              <div id="overview-theft-percent" class="card-trend trend-stable">--</div>
+            </article>
+            <article class="card card-status">
+              <div class="card-icon">STATE</div>
+              <div class="card-content">
+                <span class="card-label">System Status</span>
+                <span id="overview-status" class="card-value status-normal">NORMAL</span>
+              </div>
+              <div id="overview-mode" class="card-trend trend-up">Simulation Ready</div>
+            </article>
+          </div>
+        </section>
+
+        <section id="segment-section" class="section">
+          <h2 class="section-title">Feeder / Segment Status</h2>
+          <div class="segment-table-wrapper">
+            <table class="segment-table">
+              <thead>
+                <tr>
+                  <th>Segment</th>
+                  <th>Input (kW)</th>
+                  <th>Billed (kW)</th>
+                  <th>Travel Loss (kW)</th>
+                  <th>Theft (kW)</th>
+                  <th>Theft %</th>
+                  <th>Tech Loss %</th>
+                  <th>30D Theft Avg</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="segments-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <div class="dual-panel">
+          <section class="section panel-left">
+            <h2 class="section-title">Network Topology</h2>
+            <div class="network-diagram">
+              <div class="node node-transformer">
+                <div class="node-icon">GRID</div>
+                <div class="node-label">Transformer</div>
+                <div class="node-value"><span id="transformer-input">--</span> kW In</div>
+              </div>
+              <div class="network-lines">
+                <div class="line line-1"></div>
+                <div class="line line-2"></div>
+                <div class="line line-3"></div>
+              </div>
+              <div id="segment-nodes" class="segment-nodes"></div>
+            </div>
+          </section>
+
+          <section class="section panel-right">
+            <h2 class="section-title">Alert Log</h2>
+            <div id="alerts-list" class="alert-log"></div>
+          </section>
+        </div>
+
+        <section id="ticket-section" class="section">
+          <h2 class="section-title">Anomaly Ticketing Board</h2>
+          <div class="kanban-board">
+            <div class="kanban-column" id="col-open">
+              <h3 class="kanban-title">Open</h3>
+              <div class="kanban-cards" id="tickets-open"></div>
+            </div>
+            <div class="kanban-column" id="col-acknowledged">
+              <h3 class="kanban-title">Acknowledged</h3>
+              <div class="kanban-cards" id="tickets-acknowledged"></div>
+            </div>
+            <div class="kanban-column" id="col-resolved">
+              <h3 class="kanban-title">Resolved</h3>
+              <div class="kanban-cards" id="tickets-resolved"></div>
+            </div>
+            <div class="kanban-column" id="col-closed">
+              <h3 class="kanban-title">Closed</h3>
+              <div class="kanban-cards" id="tickets-closed"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2 class="section-title">Analytics and Graphs</h2>
+          <div class="graph-grid">
+            <article class="graph-card">
+              <h3>Input Power vs Consumption</h3>
+              <div class="chart-summary">
+                <strong id="power-label">Loading</strong>
+                <span>Input <span id="power-input-summary">--</span> kW</span>
+                <span>Consumption <span id="power-consumption-summary">--</span> kW</span>
+              </div>
+              <svg viewBox="0 0 100 100" class="chart-svg" role="img" aria-label="Power trend">
+                <polyline id="power-line" points="" class="chart-line chart-line-primary"></polyline>
+              </svg>
+            </article>
+            <article class="graph-card">
+              <h3>Total Real-Time Gap (kW)</h3>
+              <div class="chart-summary">
+                <strong>Current gap</strong>
+                <span><span id="loss-summary">--</span> kW gross gap</span>
+                <span>Travel loss <span id="travel-loss-summary">--</span> kW</span>
+                <span>Estimated theft <span id="theft-summary">--</span> kW</span>
+              </div>
+              <svg viewBox="0 0 100 100" class="chart-svg" role="img" aria-label="Loss trend">
+                <polyline id="loss-line" points="" class="chart-line chart-line-danger"></polyline>
+              </svg>
+            </article>
+            <article class="graph-card" style="grid-column: 1 / -1">
+              <h3>Segment-wise Load Distribution</h3>
+              <div id="distribution-list" class="distribution-list"></div>
+            </article>
+          </div>
+        </section>
+
+        <div class="dual-panel">
+          <section id="control-section" class="section panel-left">
+            <h2 class="section-title">Simulation Controls</h2>
+            <div class="control-panel">
+              <div class="control-status">
+                <div class="status-indicator">
+                  <span id="simulation-dot" class="sim-dot"></span>
+                  <span id="simulation-text">Simulation Ready</span>
+                </div>
+                <div id="active-scenario-badge" class="active-scenario-badge" style="display: none;">
+                  Active Scenario: <strong id="active-scenario-text">None</strong>
+                </div>
+              </div>
+              <div class="control-buttons">
+                <button id="start-button" type="button" class="btn btn-start">Start</button>
+                <button id="stop-button" type="button" class="btn btn-stop">Stop</button>
+                <button id="reset-button" type="button" class="btn btn-reset">Reset</button>
+              </div>
+              <div class="scenario-buttons">
+                <h3 class="sub-title">Inject Scenarios</h3>
+                <div class="scenario-grid">
+                  <button id="btn-scenario-hook" type="button" class="btn btn-scenario btn-scenario-hook">Direct Hook (Rule 1)</button>
+                  <button id="btn-scenario-tamper" type="button" class="btn btn-scenario btn-scenario-tamper">Meter Tampering (Rule 3)</button>
+                  <button id="btn-scenario-old" type="button" class="btn btn-scenario btn-scenario-old">Old Theft (Rule 2)</button>
+                </div>
+              </div>
+              <div class="control-params">
+                <label class="param">
+                  <span>Sampling Rate (ms)</span>
+                  <input id="sampling-input" type="range" min="500" max="5000" step="100" value="2000" />
+                  <strong id="sampling-value">2000</strong>
+                </label>
+                <button id="save-button" type="button" class="btn btn-save">Apply Settings</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="section panel-right">
+            <h2 class="section-title">GridSense Architecture</h2>
+            <div class="dataflow">
+              <div class="flow-step flow-active">
+                <div class="flow-icon">TRANSFORMER</div>
+                <div class="flow-label">Level 1 (Input)</div>
+              </div>
+              <div class="flow-arrow">-</div>
+              <div class="flow-step flow-active">
+                <div class="flow-icon">CHECKPOINTS</div>
+                <div class="flow-label">Level 2 (Segments)</div>
+              </div>
+              <div class="flow-arrow">-</div>
+              <div class="flow-step flow-active">
+                <div class="flow-icon">METERS</div>
+                <div class="flow-label">Level 3 (Output)</div>
+              </div>
+            </div>
+            <div class="dataflow-description">
+              <p>
+                GridSense divides the distribution network into auditable segments using intermediate checkpoints.
+                <br/><br/>
+                <strong>Rule 1:</strong> Real-Time Theft > 10% after travel-loss adjustment (Catches new hooks)<br/>
+                <strong>Rule 2:</strong> Persistent Theft > 8% for 7 days (Catches old theft)<br/>
+                <strong>Rule 3:</strong> Peer Comparison < 40% avg (Catches meter tampering)
+              </p>
+            </div>
+          </section>
+        </div>
+      </main>
+
+      <footer id="main-footer">
+        <p>GridSense: Smart Electricity Theft Detection System</p>
+        <p class="footer-sub">Rule-Based Energy Balance Monitoring</p>
+      </footer>
+    </div>
+
+    <script type="module" src="/static/main.js"></script>
+  </body>
+</html>
