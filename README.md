@@ -79,7 +79,7 @@ README.md
 - Python 3.10+
 - Node.js 18+
 
-### 1) Run Backend
+### 1) Run Project
 
 ```bash
 cd /home/runner/work/GridSense/GridSense/backend
@@ -88,22 +88,6 @@ uvicorn app.main:app --reload
 ```
 
 Backend default: `http://127.0.0.1:8000`
-
-### 2) Run Frontend (Dev)
-
-```bash
-cd /home/runner/work/GridSense/GridSense/frontend
-npm install
-npm run dev
-```
-
-Frontend default: `http://127.0.0.1:5173`
-
-Set API target if needed:
-
-```bash
-VITE_API_BASE_URL=http://127.0.0.1:8000
-```
 
 ## Key API Endpoints
 
